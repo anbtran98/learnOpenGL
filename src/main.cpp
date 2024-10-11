@@ -32,9 +32,12 @@ int main() {
     glfwSetFramebufferSizeCallback( window, framebuffer_size_callback );
 
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f, // left
+        0.0f, -0.5f, 0.0f, // right
+        -0.5f, 0.5f, 0.0f, // top
+        0.0f, -0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
-        0.0f, 0.5f, 0.0f
+        0.5f, 0.5f, 0.0f
     };
 
     //
@@ -128,7 +131,7 @@ int main() {
 
         glUseProgram( shaderProgram ); // Shader Program Section
         glBindVertexArray(VAO); // VAO Section
-        glDrawArrays( GL_TRIANGLES, 0, 3 ); // VAO Section
+        glDrawArrays( GL_TRIANGLES, 0, 6 ); // VAO Section
 
         /* Check and call events and swap the buffers */
         glfwSwapBuffers( window );
