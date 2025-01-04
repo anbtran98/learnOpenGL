@@ -31,16 +31,32 @@ int main() {
 
     glfwSetFramebufferSizeCallback( window, framebuffer_size_callback );
 
-    float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f, 0.5f, 0.0f
+    // VBO example without EBO
+    // float vertices[] = {
+    //     -0.5f, -0.5f, 0.0f,
+    //     0.5f, -0.5f, 0.0f,
+    //     0.0f, 0.5f, 0.0f
+    // };
+
+    // VBO example with EBO
+    float vertices [] = {
+        0.5f,  0.5f, 0.0f,  // top right
+        0.5f, -0.5f, 0.0f,  // bottom right
+        -0.5f, -0.5f, 0.0f,  // bottom left
+        -0.5f,  0.5f, 0.0f  // top left
+    };
+    unsigned int indices [] = {
+        0, 1, 3,
+        1, 2, 3
     };
 
-    //
-    /* Create the objects */
+    /* VBO */
     unsigned int VBO;
     glGenBuffers( 1, &VBO );
+
+    /* EBO */
+    unsigned int EBO;
+    glGenBuffers( 1, &EBO );
 
     /* VAO Section */
     unsigned int VAO;
@@ -50,8 +66,14 @@ int main() {
 
     // Bind the object to a buffer type
     glBindBuffer( GL_ARRAY_BUFFER, VBO );
-    // Copy vertex data into buffer memory
     glBufferData( GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW );
+
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, EBO );
+    glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW );
+
+    /* Linking Vertex Attributes Section */
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0 );
+    glEnableVertexAttribArray(0);
 
     /* Vertex Shader  */
     // Create vertex shader source and object
@@ -85,8 +107,6 @@ int main() {
     glShaderSource( fragmentShader, 1, &fragmentShaderSource, NULL );
     glCompileShader( fragmentShader );
     //Error logging
-    // int success;
-    // char infoLog[512];
     glGetShaderiv( fragmentShader, GL_COMPILE_STATUS, &success );
     if (!success) {
         glGetShaderInfoLog( fragmentShader, 512, NULL, infoLog );
@@ -102,8 +122,6 @@ int main() {
     glAttachShader( shaderProgram, fragmentShader );
     glLinkProgram( shaderProgram );
     // Error Logging
-    // int success;
-    // char infoLog[512];
     glGetProgramiv( shaderProgram, GL_LINK_STATUS, &success );
     if (!success) {
         glGetProgramInfoLog( shaderProgram, 512, NULL, infoLog );
@@ -111,11 +129,6 @@ int main() {
     }
     glDeleteShader( vertexShader );
     glDeleteShader( fragmentShader );
-
-    /* Linking Vertex Attributes Section */
-    // Instruct opengl on how to interpret vertex data
-    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0 );
-    glEnableVertexAttribArray(0);
 
     while ( !glfwWindowShouldClose(window) ) {
         /* Update  */
@@ -127,8 +140,10 @@ int main() {
         glClear( GL_COLOR_BUFFER_BIT );
 
         glUseProgram( shaderProgram ); // Shader Program Section
-        glBindVertexArray(VAO); // VAO Section
-        glDrawArrays( GL_TRIANGLES, 0, 3 ); // VAO Section
+        glBindVertexArray(VAO);
+        // draw triangle with only VBO
+        // glDrawArrays( GL_TRIANGLES, 0, 3 );
+        glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
 
         /* Check and call events and swap the buffers */
         glfwSwapBuffers( window );
@@ -142,6 +157,17 @@ int main() {
 void processInput( GLFWwindow* window ) {
     if ( glfwGetKey( window, GLFW_KEY_ESCAPE ) == GLFW_PRESS )
         glfwSetWindowShouldClose( window, true );
+    else if ( glfwGetKey( window, GLFW_KEY_SPACE ) == GLFW_PRESS ) {
+        static bool flag = true;
+        if (flag) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            flag = false;
+        }
+        else {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            flag = true;
+        }
+    }
 }
 
 void framebuffer_size_callback( GLFWwindow* window, int width, int height ) {
