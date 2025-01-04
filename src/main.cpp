@@ -32,31 +32,34 @@ int main() {
     glfwSetFramebufferSizeCallback( window, framebuffer_size_callback );
 
     // VBO example without EBO
-    // float vertices[] = {
-    //     -0.5f, -0.5f, 0.0f,
-    //     0.5f, -0.5f, 0.0f,
-    //     0.0f, 0.5f, 0.0f
-    // };
+    float vertices[] = {
+        -0.5f, 0.5f, 0.0f,
+        0.0f, -0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f,
+        0.5f, 0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+        0.0f, -0.5f, 0.0f
+    };
 
     // VBO example with EBO
-    float vertices [] = {
-        0.5f,  0.5f, 0.0f,  // top right
-        0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f,  // bottom left
-        -0.5f,  0.5f, 0.0f  // top left
-    };
-    unsigned int indices [] = {
-        0, 1, 3,
-        1, 2, 3
-    };
+    // float vertices [] = {
+    //     0.5f,  0.5f, 0.0f,  // top right
+    //     0.5f, -0.5f, 0.0f,  // bottom right
+    //     -0.5f, -0.5f, 0.0f,  // bottom left
+    //     -0.5f,  0.5f, 0.0f  // top left
+    // };
+    // unsigned int indices [] = {
+    //     0, 1, 3,
+    //     1, 2, 3
+    // };
 
     /* VBO */
     unsigned int VBO;
     glGenBuffers( 1, &VBO );
 
     /* EBO */
-    unsigned int EBO;
-    glGenBuffers( 1, &EBO );
+    // unsigned int EBO;
+    // glGenBuffers( 1, &EBO );
 
     /* VAO Section */
     unsigned int VAO;
@@ -68,8 +71,8 @@ int main() {
     glBindBuffer( GL_ARRAY_BUFFER, VBO );
     glBufferData( GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW );
 
-    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, EBO );
-    glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW );
+    // glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, EBO );
+    // glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW );
 
     /* Linking Vertex Attributes Section */
     glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0 );
@@ -142,8 +145,8 @@ int main() {
         glUseProgram( shaderProgram ); // Shader Program Section
         glBindVertexArray(VAO);
         // draw triangle with only VBO
-        // glDrawArrays( GL_TRIANGLES, 0, 3 );
-        glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
+        glDrawArrays( GL_TRIANGLES, 0, 6 );
+        // glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
 
         /* Check and call events and swap the buffers */
         glfwSwapBuffers( window );
