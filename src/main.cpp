@@ -31,30 +31,47 @@ int main() {
 
     glfwSetFramebufferSizeCallback( window, framebuffer_size_callback );
 
-    float vertices[] = {
-        -0.5f, -0.5f, 0.0f, // left
-        0.0f, -0.5f, 0.0f, // right
-        -0.5f, 0.5f, 0.0f, // top
-        0.0f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.5f, 0.5f, 0.0f
+    // Left triangle
+    float triangle1Vert[] = {
+        -0.5f, -0.5f, 0.0f, // top left
+        0.0f, -0.5f, 0.0f, // bottom right
+        -0.5f, 0.5f, 0.0f, // bottom left
     };
 
-    //
-    /* Create the objects */
-    unsigned int VBO;
-    glGenBuffers( 1, &VBO );
+    // right triangle
+    float triangle2Vert[] = {
+        0.0f, -0.5f, 0.0f, // top right
+        0.5f, -0.5f, 0.0f, // bottom right
+        0.5f, 0.5f, 0.0f // bottom left
+    };
 
-    /* VAO Section */
-    unsigned int VAO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray( VAO ); // bind vertex array object
-    /*----------------------------------------*/
+    // Triangle 1 VBO & VAO settings
+    unsigned int triangle1VBO;
+    glGenBuffers( 1, &triangle1VBO );
+    unsigned int triangle1VAO;
+    glGenVertexArrays(1, &triangle1VAO);
+    glBindVertexArray( triangle1VAO );
 
-    // Bind the object to a buffer type
-    glBindBuffer( GL_ARRAY_BUFFER, VBO );
-    // Copy vertex data into buffer memory
-    glBufferData( GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW );
+    // triangle 1 VBO
+    glBindBuffer( GL_ARRAY_BUFFER, triangle1VBO );
+    glBufferData( GL_ARRAY_BUFFER, sizeof(triangle1Vert), triangle1Vert, GL_STATIC_DRAW );
+
+    /* Linking Vertex Attributes Section */
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0 );
+    glEnableVertexAttribArray(0);
+
+    // Triangle 2 VBO & VAO settings
+    unsigned int triangle2VBO;
+    glGenBuffers( 1, &triangle2VBO );
+    unsigned int triangle2VAO;
+    glGenVertexArrays( 1, &triangle2VAO );
+    glBindVertexArray( triangle2VAO );
+
+    glBindBuffer( GL_ARRAY_BUFFER, triangle2VBO );
+    glBufferData( GL_ARRAY_BUFFER, sizeof(triangle2Vert), triangle2Vert, GL_STATIC_DRAW );
+
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0 );
+    glEnableVertexAttribArray(0);
 
     /* Vertex Shader  */
     // Create vertex shader source and object
@@ -88,8 +105,6 @@ int main() {
     glShaderSource( fragmentShader, 1, &fragmentShaderSource, NULL );
     glCompileShader( fragmentShader );
     //Error logging
-    // int success;
-    // char infoLog[512];
     glGetShaderiv( fragmentShader, GL_COMPILE_STATUS, &success );
     if (!success) {
         glGetShaderInfoLog( fragmentShader, 512, NULL, infoLog );
@@ -105,8 +120,6 @@ int main() {
     glAttachShader( shaderProgram, fragmentShader );
     glLinkProgram( shaderProgram );
     // Error Logging
-    // int success;
-    // char infoLog[512];
     glGetProgramiv( shaderProgram, GL_LINK_STATUS, &success );
     if (!success) {
         glGetProgramInfoLog( shaderProgram, 512, NULL, infoLog );
@@ -114,11 +127,6 @@ int main() {
     }
     glDeleteShader( vertexShader );
     glDeleteShader( fragmentShader );
-
-    /* Linking Vertex Attributes Section */
-    // Instruct opengl on how to interpret vertex data
-    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0 );
-    glEnableVertexAttribArray(0);
 
     while ( !glfwWindowShouldClose(window) ) {
         /* Update  */
@@ -128,10 +136,13 @@ int main() {
         /* Draw  */
         glClearColor( 0.2f, 0.3f, 0.3f, 1.0f );
         glClear( GL_COLOR_BUFFER_BIT );
-
         glUseProgram( shaderProgram ); // Shader Program Section
-        glBindVertexArray(VAO); // VAO Section
-        glDrawArrays( GL_TRIANGLES, 0, 6 ); // VAO Section
+        // drawing triangle 1
+        glBindVertexArray(triangle1VAO);
+        glDrawArrays( GL_TRIANGLES, 0, 3 );
+        // drawing triangle 2
+        glBindVertexArray( triangle2VAO );
+        glDrawArrays( GL_TRIANGLES, 0, 3 );
 
         /* Check and call events and swap the buffers */
         glfwSwapBuffers( window );
