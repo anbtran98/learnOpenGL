@@ -9,6 +9,24 @@ void framebuffer_size_callback( GLFWwindow* window, int width, int height );
 const unsigned int SCREEN_WIDTH = 800;
 const unsigned int SCREEN_HEIGHT = 600;
 
+    /* Vertex Shader  */
+    // Create vertex shader source and object
+    const char *vertexShaderSource = "#version 330 core\n"
+        "layout (location = 0) in vec3 aPos;\n"
+        "out vec4 vertextColor;\n"
+        "void main(){\n"
+        "    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+        "    vertextColor = vec4(0.5, 0.0, 0.0, 0.1);\n"
+        "}\0";
+
+/* Fragment Shader  */
+const char *fragmentShaderSource = "#version 330 core\n"
+    "in vec4 vertextColor;\n"
+    "out vec4 FragColor;\n"
+    "void main(){\n"
+    "    FragColor = vertextColor;\n"
+    "}\0";
+
 int main() {
 
     glfwInit();
@@ -33,33 +51,14 @@ int main() {
 
     // VBO example without EBO
     float vertices[] = {
-        -0.5f, 0.5f, 0.0f,
-        0.0f, -0.5f, 0.0f,
+        0.0f, 0.5f, 0.0f,
         -0.5f, -0.5f, 0.0f,
-        0.5f, 0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f, -0.5f, 0.0f
+        0.5f, -0.5f, 0.0f
     };
-
-    // VBO example with EBO
-    // float vertices [] = {
-    //     0.5f,  0.5f, 0.0f,  // top right
-    //     0.5f, -0.5f, 0.0f,  // bottom right
-    //     -0.5f, -0.5f, 0.0f,  // bottom left
-    //     -0.5f,  0.5f, 0.0f  // top left
-    // };
-    // unsigned int indices [] = {
-    //     0, 1, 3,
-    //     1, 2, 3
-    // };
 
     /* VBO */
     unsigned int VBO;
     glGenBuffers( 1, &VBO );
-
-    /* EBO */
-    // unsigned int EBO;
-    // glGenBuffers( 1, &EBO );
 
     /* VAO Section */
     unsigned int VAO;
@@ -78,13 +77,6 @@ int main() {
     glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0 );
     glEnableVertexAttribArray(0);
 
-    /* Vertex Shader  */
-    // Create vertex shader source and object
-    const char *vertexShaderSource = "#version 330 core\n"
-        "layout (location = 0) in vec3 aPos;\n"
-        "void main(){\n"
-        "    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-        "}\0";
     unsigned int vertexShader;
     vertexShader = glCreateShader( GL_VERTEX_SHADER );
     // Load the source and compile
@@ -99,12 +91,6 @@ int main() {
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
-    /* Fragment Shader  */
-    const char *fragmentShaderSource = "#version 330 core\n"
-        "out vec4 FragColor;\n"
-        "void main(){\n"
-        "    FragColor = vec4( 1.0f, 0.5f, 0.2f, 1.0f );\n"
-        "}\0";
     unsigned int fragmentShader;
     fragmentShader = glCreateShader( GL_FRAGMENT_SHADER );
     glShaderSource( fragmentShader, 1, &fragmentShaderSource, NULL );
@@ -144,9 +130,7 @@ int main() {
 
         glUseProgram( shaderProgram ); // Shader Program Section
         glBindVertexArray(VAO);
-        // draw triangle with only VBO
-        glDrawArrays( GL_TRIANGLES, 0, 6 );
-        // glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
+        glDrawArrays( GL_TRIANGLES, 0, 3 );
 
         /* Check and call events and swap the buffers */
         glfwSwapBuffers( window );
