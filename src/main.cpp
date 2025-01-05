@@ -13,18 +13,20 @@ const unsigned int SCREEN_HEIGHT = 600;
     // Create vertex shader source and object
     const char *vertexShaderSource = "#version 330 core\n"
         "layout (location = 0) in vec3 aPos;\n"
-        "out vec4 vertextColor;\n"
+        // "out vec4 vertextColor;\n"
         "void main(){\n"
         "    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-        "    vertextColor = vec4(0.5, 0.0, 0.0, 0.1);\n"
+        // "    vertextColor = vec4(1.0, 0.5, 0.2, 0.1);\n"
         "}\0";
 
 /* Fragment Shader  */
 const char *fragmentShaderSource = "#version 330 core\n"
-    "in vec4 vertextColor;\n"
+    // "in vec4 vertextColor;\n"
     "out vec4 FragColor;\n"
+    "uniform vec4 ourColor;\n"
     "void main(){\n"
-    "    FragColor = vertextColor;\n"
+    // "    FragColor = vertextColor;\n"
+    "    FragColor = ourColor;\n"
     "}\0";
 
 int main() {
@@ -69,10 +71,6 @@ int main() {
     // Bind the object to a buffer type
     glBindBuffer( GL_ARRAY_BUFFER, VBO );
     glBufferData( GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW );
-
-    // glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, EBO );
-    // glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW );
-
     /* Linking Vertex Attributes Section */
     glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0 );
     glEnableVertexAttribArray(0);
@@ -128,7 +126,11 @@ int main() {
         glClearColor( 0.2f, 0.3f, 0.3f, 1.0f );
         glClear( GL_COLOR_BUFFER_BIT );
 
-        glUseProgram( shaderProgram ); // Shader Program Section
+        glUseProgram( shaderProgram );
+        float timeVal = glfwGetTime();
+        float greenValue = sin(timeVal) / 2.0f + 0.5f;
+        int vertextColorLocation = glGetUniformLocation( shaderProgram, "ourColor" );
+        glUniform4f( vertextColorLocation, 0.0f, greenValue, 0.0f, 1.0f );
         glBindVertexArray(VAO);
         glDrawArrays( GL_TRIANGLES, 0, 3 );
 
@@ -136,6 +138,10 @@ int main() {
         glfwSwapBuffers( window );
         glfwPollEvents();
     }
+
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteProgram(shaderProgram);
 
     glfwTerminate();
     return 0;
