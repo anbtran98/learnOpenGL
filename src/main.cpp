@@ -56,7 +56,10 @@ int main() {
     glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0 );
     glEnableVertexAttribArray(0);
 
+
     Shader ourShader("src/vsShader.vs", "src/fShader.fs");
+
+
 
     while ( !glfwWindowShouldClose(window) ) {
         /* Update  */
@@ -67,13 +70,9 @@ int main() {
         glClearColor( 0.2f, 0.3f, 0.3f, 1.0f );
         glClear( GL_COLOR_BUFFER_BIT );
 
-        // glUseProgram( shaderProgram );
         ourShader.use();
-        // ourShader.setColorUni4f( "myColor", 0.7f, 0.1f, 0.7f ); // for Uniform vec4 variable
-        ourShader.setFloat( "r", 1.0f );
-        ourShader.setFloat( "g", 0.0f );
-        ourShader.setFloat( "b", 1.0f );
-        ourShader.setFloat( "a", 1.0f );
+        // ourShader.setColorUni4f( "externallySetColor", 0.7f, 0.1f, 0.7f ); // for Uniform vec4 variable
+        ourShader.setFloat( "horizontalOffset", 0.5f );
         glBindVertexArray(VAO);
         glDrawArrays( GL_TRIANGLES, 0, 3 );
 
