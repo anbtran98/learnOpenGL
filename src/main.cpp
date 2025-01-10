@@ -35,14 +35,6 @@ int main() {
 
     glfwSetFramebufferSizeCallback( window, framebuffer_size_callback );
 
-    // VBO example without EBO
-    // float vertices[] = {
-    //      // Positions
-    //      0.0f, 0.5f, 0.0f,  // top
-    //     -0.5f, -0.5f, 0.0f, // bottom left
-    //      0.5f, -0.5f, 0.0f  // bottom right
-    // };
-
     int width, height, nrChannels;
     unsigned char *data = stbi_load( "res/container.jpg", &width, &height, &nrChannels, 0 );
 
