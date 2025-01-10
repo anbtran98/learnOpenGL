@@ -1,15 +1,13 @@
 #version 330 core
 layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aColor;
+layout (location = 2) in vec2 aTexCoord;
 
-uniform float horizontalOffset;
-
-out vec4 vertPosition;
+out vec3 ourColor;
+out vec2 TexCoord;
 
 void main () {
-     vec3 temp;
-     temp = aPos * 1; // learnopengl.com - shader, exercise 1: flip triangle
-     temp.x += horizontalOffset; // learnopengl.com - shader, exercise 2: triangle horizontal offset
-     temp.y += horizontalOffset;
-     gl_Position = vec4( temp, 1.0 );
-     vertPosition = vec4( temp, 1.0 ); // learnopengl.com shader, exercise 3: set vertex position to fragment color
+     gl_Position = vec4( aPos, 1.0 );
+     ourColor = aColor;
+     TexCoord = aTexCoord;
 }
