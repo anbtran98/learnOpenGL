@@ -9,5 +9,7 @@ uniform sampler2D texture2;
 out vec4 FragColor;
 
 void main() {
-     FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.2) * vec4(ourColor, 1.0);
+     vec2 xReversedTexCoord = TexCoord;
+     xReversedTexCoord.x *= -1;
+     FragColor = mix(texture(texture1, TexCoord), texture(texture2, xReversedTexCoord), 0.2) * vec4(ourColor, 1.0);
 }
