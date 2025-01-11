@@ -7,7 +7,7 @@
 #include <iostream>
 #include "include/shader.h"
 
-void processInput( GLFWwindow* window );
+void processInput( GLFWwindow* window, Shader* shader );
 void framebuffer_size_callback( GLFWwindow* window, int width, int height );
 
 const unsigned int SCREEN_WIDTH = 800;
@@ -82,10 +82,10 @@ int main() {
 
     float vertices[] = {
         // positions          // colors           // texture coords
-        0.5f,  0.5f, 0.0f,    1.0f, 0.0f, 0.0f,   0.55f, 0.55f,   // top right
-        0.5f, -0.5f, 0.0f,    0.0f, 1.0f, 0.0f,   0.55f, 0.45f,   // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.45f, 0.45f,   // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.45f, 0.55f    // top left
+        0.5f,  0.5f, 0.0f,    1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+        0.5f, -0.5f, 0.0f,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
     };
 
     unsigned int indices[] = {
@@ -124,11 +124,12 @@ int main() {
     ourShader.use();
     ourShader.setInt("texture1", 0);
     ourShader.setInt("texture2", 1);
+    ourShader.setFloat("transInterpolation", 0.2);
 
     while ( !glfwWindowShouldClose(window) ) {
         /* Update  */
         // Input
-        processInput( window );
+        processInput( window, &ourShader );
 
         /* Draw  */
         glClearColor( 0.2f, 0.3f, 0.3f, 1.0f );
@@ -155,7 +156,10 @@ int main() {
     return 0;
 }
 
-void processInput( GLFWwindow* window ) {
+void processInput( GLFWwindow* window, Shader* shader ) {
+    static float interpolationValue = 0.2;
+    bool arrowPressed = false;
+
     if ( glfwGetKey( window, GLFW_KEY_ESCAPE ) == GLFW_PRESS )
         glfwSetWindowShouldClose( window, true );
     else if ( glfwGetKey( window, GLFW_KEY_SPACE ) == GLFW_PRESS ) {
@@ -168,6 +172,22 @@ void processInput( GLFWwindow* window ) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             flag = true;
         }
+    }
+    else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+        interpolationValue += 0.0001;
+        arrowPressed = true;
+    }
+    else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+        interpolationValue -= 0.0001;
+        arrowPressed = true;
+    }
+    if (arrowPressed) {
+        if (interpolationValue > 1) {
+            interpolationValue = 1;
+        } else if (interpolationValue < 0) {
+            interpolationValue = 0;
+        }
+        shader->setFloat("transInterpolation", interpolationValue);
     }
 }
 
