@@ -1,6 +1,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "include/stb_image.h"
 
@@ -68,7 +72,7 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
     if (data) {
         glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -124,12 +128,27 @@ int main() {
     ourShader.use();
     ourShader.setInt("texture1", 0);
     ourShader.setInt("texture2", 1);
-    ourShader.setFloat("transInterpolation", 0.2);
+    ourShader.setFloat("transInterpolation", 0.2f);
+
+
+
 
     while ( !glfwWindowShouldClose(window) ) {
         /* Update  */
         // Input
         processInput( window, &ourShader );
+
+        /* The order of the scale, translate & rotate matters.
+           Changing the order will chnage the behavior of the object */
+        glm::mat4 trans = glm::mat4(1.0f);
+        trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
+        trans = glm::translate(trans, glm::vec3(1.0f, -0.5f, 0.0f));
+        trans = glm::rotate(trans, (float) glfwGetTime(), glm::vec3(0.0f, 0.0f, 0.1f));
+
+
+        ourShader.use();
+        unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
         /* Draw  */
         glClearColor( 0.2f, 0.3f, 0.3f, 1.0f );
@@ -157,7 +176,7 @@ int main() {
 }
 
 void processInput( GLFWwindow* window, Shader* shader ) {
-    static float interpolationValue = 0.2;
+    static float interpolationValue = 0.2f;
     bool arrowPressed = false;
 
     if ( glfwGetKey( window, GLFW_KEY_ESCAPE ) == GLFW_PRESS )
@@ -174,11 +193,11 @@ void processInput( GLFWwindow* window, Shader* shader ) {
         }
     }
     else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-        interpolationValue += 0.0001;
+        interpolationValue += 0.0001f;
         arrowPressed = true;
     }
     else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-        interpolationValue -= 0.0001;
+        interpolationValue -= 0.0001f;
         arrowPressed = true;
     }
     if (arrowPressed) {

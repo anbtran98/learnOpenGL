@@ -12,11 +12,3 @@ out vec4 FragColor;
 void main() {
      FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), transInterpolation) * vec4(ourColor, 1.0);
 }
-/*
-    NOTE: scaling & shifting texture (opposite of conventional mathematic)
-    -----------------------------------------------------------
-    '*' will shrink,
-    '/' will stretch,
-    '+' will shift left,
-    '-' will shift right.
-*/
