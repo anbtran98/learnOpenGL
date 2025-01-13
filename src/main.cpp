@@ -124,14 +124,50 @@ int main() {
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
 
+    float vertices2[] = {
+        // positions          // colors           // texture coords
+        0.5f,  0.5f, 0.0f,    1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+        0.5f, -0.5f, 0.0f,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
+    };
+
+    unsigned int indices2[] = {
+        0, 1, 3,
+        1, 2, 3
+    };
+
+    unsigned int VBO2, VAO2, EBO2;
+    glGenBuffers(1, &VBO2);
+    glGenBuffers(1, &EBO2);
+    glGenVertexArrays(1, &VAO2);
+    glBindVertexArray(VAO2);
+
+    // Bind the object to a buffer type
+    glBindBuffer( GL_ARRAY_BUFFER, VBO2 );
+    glBufferData( GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW );
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO2);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices2), indices2, GL_STATIC_DRAW);
+
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0 );
+    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)) );
+    glVertexAttribPointer( 2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)) );
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+
     Shader ourShader("src/vsShader.vs", "src/fShader.fs");
     ourShader.use();
     ourShader.setInt("texture1", 0);
     ourShader.setInt("texture2", 1);
     ourShader.setFloat("transInterpolation", 0.2f);
 
-
-
+    Shader obj2("src/vsShader.vs", "src/fShader.fs");
+    obj2.use();
+    obj2.setInt("texture1", 0);
+    obj2.setInt("texture2", 1);
+    obj2.setFloat("transInterpolation", 0.2f);
 
     while ( !glfwWindowShouldClose(window) ) {
         /* Update  */
@@ -140,15 +176,7 @@ int main() {
 
         /* The order of the scale, translate & rotate matters.
            Changing the order will chnage the behavior of the object */
-        glm::mat4 trans = glm::mat4(1.0f);
-        trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
-        trans = glm::translate(trans, glm::vec3(1.0f, -0.5f, 0.0f));
-        trans = glm::rotate(trans, (float) glfwGetTime(), glm::vec3(0.0f, 0.0f, 0.1f));
-
-
-        ourShader.use();
-        unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+        float glfwCurrentTime = glfwGetTime();
 
         /* Draw  */
         glClearColor( 0.2f, 0.3f, 0.3f, 1.0f );
@@ -159,8 +187,30 @@ int main() {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
 
+        glm::mat4 trans = glm::mat4(1.0f);
+        trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
+        trans = glm::translate(trans, glm::vec3(1.0f, -0.5f, 0.0f));
+        trans = glm::rotate(trans, glfwCurrentTime, glm::vec3(0.0f, 0.0f, 0.1f));
+
+        ourShader.use();
+        unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+
         glBindVertexArray(VAO);
         glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0 );
+
+        trans = glm::mat4(1.0f);
+        trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
+        trans = glm::scale(trans, glm::vec3(glm::sin(glm::radians(glfwCurrentTime) * 100),
+                                            glm::sin(glm::radians(glfwCurrentTime) * 100),
+                                            0.0f));
+
+        obj2.use();
+        unsigned int transLocation2 =  glGetUniformLocation(obj2.ID, "transform");
+        glUniformMatrix4fv(transLocation2, 1, GL_FALSE, glm::value_ptr(trans));
+
+        glBindVertexArray(VAO2);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         /* Check and call events and swap the buffers */
         glfwSwapBuffers( window );
@@ -169,7 +219,13 @@ int main() {
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
     glDeleteProgram(ourShader.ID);
+
+    glDeleteVertexArrays(1, &VAO2);
+    glDeleteBuffers(1, &VBO2);
+    glDeleteBuffers(1, &EBO2);
+    glDeleteProgram(obj2.ID);
 
     glfwTerminate();
     return 0;
