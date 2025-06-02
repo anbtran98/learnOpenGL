@@ -174,6 +174,8 @@ int main() {
     ourShader.setInt("texture2", 1);
     ourShader.setFloat("transInterpolation", 0.2f);
 
+    glEnable(GL_DEPTH_TEST);
+
     while ( !glfwWindowShouldClose(window) ) {
         /* Update  */
         // Input
@@ -185,7 +187,7 @@ int main() {
 
         /* Draw  */
         glClearColor( 0.2f, 0.3f, 0.3f, 1.0f );
-        glClear( GL_COLOR_BUFFER_BIT );
+        glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
@@ -193,7 +195,7 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, texture2);
 
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(1.0f, 1.0f, 1.0f));
         glm::mat4 view = glm::mat4(1.0f);
         view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
         glm::mat4 projection;
