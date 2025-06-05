@@ -189,6 +189,25 @@ int main() {
 
     glEnable(GL_DEPTH_TEST);
 
+    // projection
+    glm::mat4 projection;
+    projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+
+    // static camera codes
+    /*glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+    glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
+
+    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
+
+    glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
+
+    glm::mat4 view;
+    view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f),
+                       glm::vec3(0.0f, 0.0f, 0.0f),
+                       glm::vec3(0.0f, 1.0f, 0.0f));*/
+
     while ( !glfwWindowShouldClose(window) ) {
         /* Update  */
         // Input
@@ -207,20 +226,14 @@ int main() {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
 
-        glm::mat4 view = glm::mat4(1.0f);
-        view = glm::translate(view, glm::vec3(2.0f, -1.0f, -8.0f));
-        glm::mat4 projection;
-        projection = glm::perspective(glm::radians(30.0f), 800.0f / 480.0f, 0.1f, 100.0f);
+        // view
+        const float radius = 10.0f;
+        float camX = (float)(sin(glfwGetTime()) * radius);
+        float camZ = (float)(cos(glfwGetTime()) * radius);
+        glm::mat4 view;
+        view = glm::lookAt(glm::vec3(camX, 0.0f, camZ), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0));
 
-        /*
-            Coordinate System Section Exercise 1,2
-            Observation:
-            1) View translation: Certain cube is clipped from the final view
-            2) Changing the projection:
-                - Aspect-ratio: 16:9 squish the cubes, 4:3 regular cubes
-                - FOV: large number make cubs smaller, and vice versa
-        */
-
+        // setview and projection matrix into shaders
         int viewLoc = glGetUniformLocation(ourShader.ID, "view");
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         int projectionLoc = glGetUniformLocation(ourShader.ID, "projection");
@@ -231,9 +244,8 @@ int main() {
         for (int i = 0; i < 10; i++) {
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
-            if (i % 3 == 0) { // Coordinate System Section Exercise 3
-                model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(1.0f, 1.0f, 0.0f));
-            }
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 1.0f, 0.0f));
 
             int modelLoc = glGetUniformLocation(ourShader.ID, "model");
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
