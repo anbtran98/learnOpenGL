@@ -11,11 +11,25 @@
 #include <iostream>
 #include "include/shader.h"
 
-void processInput( GLFWwindow* window, Shader* shader );
-void framebuffer_size_callback( GLFWwindow* window, int width, int height );
-
 const unsigned int SCREEN_WIDTH = 800;
 const unsigned int SCREEN_HEIGHT = 600;
+
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+float yaw = -90.0f;
+float pitch = 0.0f;
+
+float lastX{400}, lastY{300};
+float fov = 45.0f;
+float dt{0.0f};
+float lastFrame{0.0f};
+
+void processInput( GLFWwindow* window, Shader* shader);
+void framebuffer_size_callback( GLFWwindow* window, int width, int height );
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 int main() {
 
@@ -190,28 +204,15 @@ int main() {
     glEnable(GL_DEPTH_TEST);
 
     // projection
-    glm::mat4 projection;
-    projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
-    // static camera codes
-    /*glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-    glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
-
-    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-    glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
-
-    glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
-
-    glm::mat4 view;
-    view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f),
-                       glm::vec3(0.0f, 0.0f, 0.0f),
-                       glm::vec3(0.0f, 1.0f, 0.0f));*/
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
     while ( !glfwWindowShouldClose(window) ) {
         /* Update  */
         // Input
-        processInput( window, &ourShader );
+        processInput( window, &ourShader);
 
         /* The order of the scale, translate & rotate matters.
            Changing the order will chnage the behavior of the object */
@@ -227,11 +228,17 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, texture2);
 
         // view
-        const float radius = 10.0f;
-        float camX = (float)(sin(glfwGetTime()) * radius);
-        float camZ = (float)(cos(glfwGetTime()) * radius);
+        glm::vec3 direction;
+        direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        direction.y = sin(glm::radians(pitch));
+        direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        cameraFront = glm::normalize(direction);
+
         glm::mat4 view;
-        view = glm::lookAt(glm::vec3(camX, 0.0f, camZ), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0));
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        glm::mat4 projection;
+        projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
+
 
         // setview and projection matrix into shaders
         int viewLoc = glGetUniformLocation(ourShader.ID, "view");
@@ -266,39 +273,68 @@ int main() {
     return 0;
 }
 
-void processInput( GLFWwindow* window, Shader* shader ) {
+void processInput( GLFWwindow* window, Shader* shader) {
+    float currentFrame = glfwGetTime();
+    dt = currentFrame - lastFrame;
+    lastFrame = currentFrame;
+
     static float interpolationValue = 0.2f;
     bool arrowPressed = false;
+    float cameraSpeed = 10.0f * dt;
 
     if ( glfwGetKey( window, GLFW_KEY_ESCAPE ) == GLFW_PRESS )
         glfwSetWindowShouldClose( window, true );
-    else if ( glfwGetKey( window, GLFW_KEY_SPACE ) == GLFW_PRESS ) {
-        static bool flag = true;
-        if (flag) {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            flag = false;
+    else {
+        if ( glfwGetKey( window, GLFW_KEY_SPACE ) == GLFW_PRESS ) {
+            static bool flag = true;
+            if (flag) {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                flag = false;
+            }
+            else {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                flag = true;
+            }
         }
-        else {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            flag = true;
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+            cameraPos += cameraSpeed * cameraFront;
+        }
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+            cameraPos -= cameraSpeed * cameraFront;
+        }
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+            cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        }
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+            cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
         }
     }
-    else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-        interpolationValue += 0.0001f;
-        arrowPressed = true;
-    }
-    else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-        interpolationValue -= 0.0001f;
-        arrowPressed = true;
-    }
-    if (arrowPressed) {
-        if (interpolationValue > 1) {
-            interpolationValue = 1;
-        } else if (interpolationValue < 0) {
-            interpolationValue = 0;
-        }
-        shader->setFloat("transInterpolation", interpolationValue);
-    }
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    float xoffset{(float)xpos - lastX}, yoffset{lastY - (float)ypos};
+    lastX = xpos;
+    lastY = ypos;
+
+    const float sensitivity = 0.1f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    fov -= (float)yoffset;
+    if (fov < 1.0f)
+        fov = 1.0f;
+    if (fov < 45.0f)
+        fov  = 45.0f;
 }
 
 void framebuffer_size_callback( GLFWwindow* window, int width, int height ) {
