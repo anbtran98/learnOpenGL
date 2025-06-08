@@ -20,4 +20,5 @@ class Shader {
     void setBool( const std::string &name, bool value) const;
     void setInt( const std::string &name, int value) const;
     void setFloat( const std::string &name, float value) const;
+    void setVec3( const std::string &name, float val1, float val2, float val3 );
 };
