@@ -21,4 +21,5 @@ class Shader {
     void setInt( const std::string &name, int value) const;
     void setFloat( const std::string &name, float value) const;
     void setVec3( const std::string &name, float val1, float val2, float val3 );
+    void setVec3( const std::string &name, const glm::vec3 &inVec3);
 };
