@@ -193,14 +193,18 @@ int main() {
         glUniformMatrix4fv(glGetUniformLocation(ourShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
         // Set fixed light color
-        ourShader.setVec3("light.position", lightPos);
-        //ourShader.setVec3("light.direction", -0.2f, -1.0f, -0.3f);
-        ourShader.setVec3("light.ambient",  0.2f, 0.2f, 0.2f);
-        ourShader.setVec3("light.diffuse",  0.5f, 0.5f, 0.5f); // darken diffuse light a bit
+        ourShader.setVec3("light.position", cameraPos);
+        ourShader.setVec3("light.direction", cameraFront);
+        ourShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+
+        ourShader.setVec3("light.ambient",  0.1f, 0.1f, 0.1f);
+        ourShader.setVec3("light.diffuse",  0.8f, 0.8f, 0.8f); // darken diffuse light a bit
         ourShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
         ourShader.setFloat("light.constant", 1.0f);
         ourShader.setFloat("light.linear", 0.09f);
         ourShader.setFloat("light.quadratic", 0.032f);
+
         ourShader.setFloat("material.shininess", 64.0f);
 
         ourShader.setVec3("viewPos", cameraPos);
