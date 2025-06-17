@@ -196,6 +196,7 @@ int main() {
         ourShader.setVec3("light.position", cameraPos);
         ourShader.setVec3("light.direction", cameraFront);
         ourShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+        ourShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
 
         ourShader.setVec3("light.ambient",  0.1f, 0.1f, 0.1f);
         ourShader.setVec3("light.diffuse",  0.8f, 0.8f, 0.8f); // darken diffuse light a bit
